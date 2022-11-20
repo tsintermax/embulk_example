@@ -1,0 +1,5 @@
+in:
+  type: file
+  path_prefix: '/workspaces/embulk_test/./try1_csv/csv/sample_'
+out:
+  type: stdout

@@ -1,0 +1,76 @@
+in:
+  type: file
+  path_prefix: /workspaces/embulk_test/try3_csv_filter/inputs/
+  parser:
+    charset: MS932
+    newline: CRLF
+    type: csv
+    delimiter: ','
+    quote: '"'
+    escape: '"'
+    trim_if_not_quoted: false
+    skip_header_lines: 1
+    allow_extra_columns: false
+    allow_optional_columns: false
+    columns:
+    - {name: お客様CD, type: string}
+    - {name: お客様名, type: string}
+    - {name: 電話番号1, type: string}
+    - {name: 電話番号2, type: string}
+    - {name: 郵便番号, type: string}
+    - {name: 都道府県, type: string}
+    - {name: 商品中分類名, type: string}
+    - {name: 商品名, type: string}
+    - {name: 注文数, type: long}
+    - {name: 税込金額, type: long}
+    - {name: お届け日, type: timestamp, format: '%Y%m%d'}
+
+
+filters:
+  # remove columns explicitly
+  - type: remove_columns
+    remove: ["お客様名", "電話番号1", "電話番号2"]
+
+  # remove columns implicitly
+  - type: column
+    columns:
+    - {name: 郵便番号, type: string}
+    - {name: 都道府県, type: string}
+
+  - type: rename
+    columns:
+      郵便番号: postal_code
+      都道府県: prefecture_name
+
+  # single-line condition
+  - type: row
+    where: pref = '佐賀県'
+
+  # multi-line conditions
+  - type: row
+    where: |-
+      (
+         "都道府県" START_WITH '佐賀'
+      )
+      OR
+      (
+        "商品名" = 'hoge' 
+        AND
+        "商品中分類名" = 'hoge'
+      )
+
+out:
+  type: file
+  path_prefix: /workspaces/embulk_test/try3_csv_filter/outputs/
+  file_ext: csv
+  formatter:
+    type: csv
+    delimiter: "\t"
+    newline: CRLF
+    newline_in_field: LF
+    charset: UTF-8
+    quote_policy: MINIMAL
+    quote: '"'
+    escape: "\\"
+    null_string: "\\N"
+    default_timezone: 'UTC'

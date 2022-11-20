@@ -1,0 +1,5 @@
+in:
+  type: file
+  path_prefix: '/workspaces/embulk_test/try3_csv_filter/inputs/'
+out:
+  type: stdout
